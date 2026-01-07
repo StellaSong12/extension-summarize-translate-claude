@@ -6,7 +6,8 @@ import {
 
 const INITIAL_OPTIONS = {
   apiKey: "",
-  languageModel: "4.5-haiku",
+  apiBaseUrl: "https://api.anthropic.com",
+  languageModel: "4.5-opus",
   languageCode: "en",
   userLanguage: "Turkish",
   noTextAction: "summarize",
@@ -31,6 +32,7 @@ const showStatusMessage = (message, duration) => {
 
 const getOptionsFromForm = (includeApiKey) => {
   const options = {
+    apiBaseUrl: document.getElementById("apiBaseUrl").value,
     version: chrome.runtime.getManifest().version,
     languageModel: document.getElementById("languageModel").value,
     languageCode: document.getElementById("languageCode").value,
@@ -55,6 +57,7 @@ const setOptionsToForm = async () => {
   const options = await chrome.storage.local.get(INITIAL_OPTIONS);
 
   document.getElementById("apiKey").value = options.apiKey;
+  document.getElementById("apiBaseUrl").value = options.apiBaseUrl || "https://api.anthropic.com/v1";
   document.getElementById("languageModel").value = options.languageModel;
   document.getElementById("languageCode").value = options.languageCode;
   document.getElementById("userLanguage").value = options.userLanguage;
@@ -68,7 +71,7 @@ const setOptionsToForm = async () => {
 
   // Set the default language model if the language model is not set
   if (!document.getElementById("languageModel").value) {
-    document.getElementById("languageModel").value = "4.5-haiku";
+    document.getElementById("languageModel").value = "4.5-opus";
   }
 };
 
@@ -87,11 +90,6 @@ const initialize = async () => {
 
   // Apply font size
   applyFontSize((await chrome.storage.local.get({ fontSize: "medium" })).fontSize);
-
-  // Load the language model template
-  const languageModelTemplate = await loadTemplate("languageModelTemplate");
-  document.getElementById("languageModelContainer").appendChild(languageModelTemplate);
-
   // Load the language code template
   const languageCodeTemplate = await loadTemplate("languageCodeTemplate");
   document.getElementById("languageCodeContainer").appendChild(languageCodeTemplate);

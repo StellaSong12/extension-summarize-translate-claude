@@ -349,10 +349,7 @@ const initialize = async () => {
   applyFontSize((await chrome.storage.local.get({ fontSize: "medium" })).fontSize);
 
   // Load the language model template
-  const languageModelTemplate = await loadTemplate("languageModelTemplate");
-  document.getElementById("languageModelContainer").appendChild(languageModelTemplate);
-
-  // Load the language code template
+  // Load the language code template (languageModel is a text input)
   const languageCodeTemplate = await loadTemplate("languageCodeTemplate");
   document.getElementById("languageCodeContainer").appendChild(languageCodeTemplate);
 
@@ -366,14 +363,14 @@ const initialize = async () => {
 
   // Restore the language model and language code from the local storage
   const { languageModel, languageCode } =
-    await chrome.storage.local.get({ languageModel: "4.5-haiku", languageCode: "en" });
+    await chrome.storage.local.get({ languageModel: "4.5-opus", languageCode: "en" });
 
   document.getElementById("languageModel").value = languageModel;
   document.getElementById("languageCode").value = languageCode;
 
   // Set the default language model if the language model is not set
   if (!document.getElementById("languageModel").value) {
-    document.getElementById("languageModel").value = "4.5-haiku";
+    document.getElementById("languageModel").value = "4.5-opus";
   }
 
   main(true);

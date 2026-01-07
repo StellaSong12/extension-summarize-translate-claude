@@ -89,23 +89,28 @@ export const convertMarkdownToHtml = (content, breaks) => {
   return htmlDiv.innerHTML;
 };
 
-export const getModelId = (languageModel) => {
-  const modelMappings = {
-    "4.5-opus": "claude-opus-4-5",
-    "4.1-opus": "claude-opus-4-1",
-    "4-opus": "claude-opus-4-0",
-    "4.5-sonnet": "claude-sonnet-4-5",
-    "4-sonnet": "claude-sonnet-4-0",
-    "4.5-haiku": "claude-haiku-4-5",
-    "3-haiku": "claude-3-haiku-20240307"
-  };
-
-  return modelMappings[languageModel];
-};
-
 export const generateContent = async (apiKey, systemPrompt, apiContents, modelId) => {
   try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const { apiBaseUrl = "https://api.anthropic.com" } = await chrome.storage.local.get({ apiBaseUrl: "https://api.anthropic.com" });
+    // Normalize base URL and ensure /v1 is present (append if user provided host only)
+    let base = apiBaseUrl.replace(/\/$/, "");
+    if (!/\/v1($|\/)/i.test(base)) {
+      base = `${base}/v1`;
+    }
+    const endpoint = `${base}/messages`;
+
+    // Validate apiBaseUrl format to avoid silent relative requests
+    if (!apiBaseUrl || !/^https?:\/\//i.test(apiBaseUrl)) {
+      throw new Error(`Invalid apiBaseUrl configured: "${apiBaseUrl}"`);
+    }
+
+    if (!apiKey) {
+      console.warn("generateContent: apiKey is empty. The request may be rejected by the API.");
+    }
+
+    console.debug(`generateContent -> POST ${endpoint}`);
+
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -127,10 +132,11 @@ export const generateContent = async (apiKey, systemPrompt, apiContents, modelId
       body: tryParseJson(await response.text())
     };
   } catch (error) {
+    console.error("generateContent error:", error);
     return {
       ok: false,
       status: 1000,
-      body: { error: { message: error.stack } }
+      body: { error: { message: error.message || String(error), detail: error.stack } }
     };
   }
 };
@@ -138,8 +144,26 @@ export const generateContent = async (apiKey, systemPrompt, apiContents, modelId
 export const streamGenerateContent = async (apiKey, systemPrompt, apiContents, modelId, streamKey) => {
   try {
     await chrome.storage.session.remove(streamKey);
+    const { apiBaseUrl = "https://api.anthropic.com" } = await chrome.storage.local.get({ apiBaseUrl: "https://api.anthropic.com" });
+    // Normalize base URL and ensure /v1 is present (append if user provided host only)
+    let base = apiBaseUrl.replace(/\/$/, "");
+    if (!/\/v1($|\/)/i.test(base)) {
+      base = `${base}/v1`;
+    }
+    const endpoint = `${base}/messages`;
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    // Validate apiBaseUrl format
+    if (!apiBaseUrl || !/^https?:\/\//i.test(apiBaseUrl)) {
+      throw new Error(`Invalid apiBaseUrl configured: "${apiBaseUrl}"`);
+    }
+
+    if (!apiKey) {
+      console.warn("streamGenerateContent: apiKey is empty. The request may be rejected by the API.");
+    }
+
+    console.debug(`streamGenerateContent -> POST ${endpoint}`);
+
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -218,10 +242,11 @@ export const streamGenerateContent = async (apiKey, systemPrompt, apiContents, m
       };
     }
   } catch (error) {
+    console.error("streamGenerateContent error:", error);
     return {
       ok: false,
       status: 1000,
-      body: { error: { message: error.stack } }
+      body: { error: { message: error.message || String(error), detail: error.stack } }
     };
   }
 };

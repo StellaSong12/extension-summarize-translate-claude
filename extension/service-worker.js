@@ -1,5 +1,4 @@
 import {
-  getModelId,
   generateContent,
   streamGenerateContent
 } from "./utils.js";
@@ -67,7 +66,14 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
       // Generate content
       const { actionType, mediaType, taskInput, languageModel, languageCode, streamKey } = request;
       const { apiKey, streaming } = await chrome.storage.local.get({ apiKey: "", streaming: false });
-      const modelId = getModelId(languageModel);
+
+      // Use the model string provided by the popup directly. If it's empty, fall back
+      // to the stored option `languageModel` (which may itself be a raw model id).
+      let modelId = languageModel;
+      if (!modelId) {
+        const stored = await chrome.storage.local.get({ languageModel: "4.5-opus" });
+        modelId = stored.languageModel;
+      }
 
       const systemPrompt = await getSystemPrompt(
         actionType,

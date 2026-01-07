@@ -24,6 +24,10 @@
     <br>
     <input type="password" id="apiKey" size="39">
     <br>
+    <span>API Base URL</span>
+    <br>
+    <input type="text" id="apiBaseUrl" size="39" placeholder="https://api.anthropic.com">
+    <br>
     <small>
       <span data-i18n="options_apikey_hint">You can obtain a Claude API Key at the following page.</span>
       <a href="https://claude.com/platform/api" target="_blank">Claude Developer Platform | Claude</a>
@@ -35,7 +39,7 @@
   <p>
     <span data-i18n="options_model">Language Model</span>
     <br>
-    <span id="languageModelContainer"></span>
+    <input id="languageModel" type="text" size="39" placeholder="4.5-opus">
   </p>
 
   <hr>

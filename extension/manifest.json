@@ -21,6 +21,10 @@
     "scripting",
     "storage"
   ],
+  "host_permissions": [
+    "https://api.anthropic.com/*",
+    "https://aigw.ds.163.com/*"
+  ],
   "commands": {
     "_execute_action": {
       "suggested_key": {

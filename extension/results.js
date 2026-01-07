@@ -4,7 +4,6 @@ import {
   loadTemplate,
   displayLoadingMessage,
   convertMarkdownToHtml,
-  getModelId,
   generateContent,
   streamGenerateContent,
   exportTextToFile
@@ -109,7 +108,12 @@ const askQuestion = async () => {
   // Generate the response
   const { apiKey, streaming } = await chrome.storage.local.get({ apiKey: "", streaming: false });
   const languageModel = document.getElementById("languageModel").value;
-  const modelId = getModelId(languageModel);
+  // Use the model string directly. If empty, fall back to stored languageModel.
+  let modelId = languageModel;
+  if (!modelId) {
+    const stored = await chrome.storage.local.get({ languageModel: "4.5-opus" });
+    modelId = stored.languageModel;
+  }
   let response = null;
 
   if (streaming) {
